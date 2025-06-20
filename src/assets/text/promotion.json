@@ -1,0 +1,17 @@
+{
+    "message" : {
+        "header": "Special Promotion",
+        "details": "Get 20% off on your first purchase! Use code: WELCOME20",
+        "image": "assets/images/promotion.jpg"
+    },
+    "buttons": [
+        {
+            "text": "Shop Now",
+            "style": "Secondary"
+        },
+        {
+            "text": "Learn More",
+            "style": "Link"
+        }
+    ]
+}
