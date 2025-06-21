@@ -12,6 +12,7 @@ const {
     ContainerBuilder, 
     EmbedBuilder
 } = require('discord.js');
+const { channels } = require('../utils/config.json')
 
 module.exports = {
     name: Events.InteractionCreate,
@@ -24,7 +25,7 @@ module.exports = {
             // handle support ticket
             case 'create_support_ticket': {
                 const thread = await channel.threads.create({
-                    name: `${interaction.user.username}'s Support`,
+                    name: `${interaction.user.username}'s Chat`,
                     type: ChannelType.PrivateThread,
                     reason: interaction.user.id,
                 });
@@ -50,7 +51,7 @@ module.exports = {
                                 .addComponents(
                                     new ButtonBuilder()
                                         .setStyle(ButtonStyle.Primary)
-                                        .setLabel("แก้ไขแล้วเรียบร้อย")
+                                        .setLabel("แก้ไขแล้ว")
                                         .setCustomId("close_support_ticket"),
                                 ),
                         ),
@@ -61,7 +62,7 @@ module.exports = {
                     flags: MessageFlags.IsComponentsV2,
                 });
 
-                const ticketNotiChannel = interaction.client.channels.cache.get("1385696347268714787");
+                const ticketNotiChannel = interaction.client.channels.cache.get(channels.modlogs);
                 const ticketNotiEmbed = new EmbedBuilder()
                     .setDescription(`### 📫 **มีการเปิดทิคเก็ตใหม่โดย <@${interaction.user.id}>**\n🕑 เวลา  : <t:${unixTime}:f>\n📎 ลิงก์ข้อความ : ${thread.url}`)
                     .setColor("#00f556");
@@ -82,7 +83,7 @@ module.exports = {
                     try {
                         await channel.delete();
 
-                        const ticketNotiChannel = interaction.client.channels.cache.get("1385696347268714787");
+                        const ticketNotiChannel = interaction.client.channels.cache.get(channels.modlogs);
                         const ticketNotiEmbed = new EmbedBuilder()
                             .setDescription(`### 🔒 **ทิคเก็ตของ <@${interaction.user.id}> ถูกปิดเรียบร้อยแล้ว**\n🕑 เวลา  : <t:${unixTime}:f>\n👤 ผู้ดำเนินการ : <@${interaction.user.id}>`)
                             .setColor("#f50031");
@@ -112,7 +113,7 @@ module.exports = {
 
                 if (channel.type === ChannelType.PublicThread || channel.type === ChannelType.PrivateThread) {
                     await interaction.reply({ 
-                        content: `✅ <@${user.id}> ทำเครื่องหมายแก้ไขปัญหาแล้วสำเร็จ`, 
+                        content: `✅ <@${user.id}> ทำเครื่องหมายแก้ไขปัญหาแล้วสำเร็จ `, 
                         flags: MessageFlags.Ephemeral 
                     });
 

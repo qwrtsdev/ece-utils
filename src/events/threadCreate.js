@@ -9,14 +9,13 @@ const {
     ActionRowBuilder, 
     ContainerBuilder, 
 } = require('discord.js');
+const { channels } = require('../utils/config.json')
 
 module.exports = {
     name: Events.ThreadCreate,
     once: false,
     execute(interaction) {
-        const threadChannelID = "1385693239545303070"
-
-        if (interaction.parentId === threadChannelID) {
+        if (interaction.parentId === channels.helpThread) {
             const components = [
                 new ContainerBuilder()
                     .addTextDisplayComponents(
