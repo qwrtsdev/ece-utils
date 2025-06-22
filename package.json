@@ -8,6 +8,7 @@
     "@napi-rs/canvas": "^0.1.71",
     "discord.js": "^14.19.3",
     "dotenv": "^16.5.0",
-    "libsodium-wrappers": "^0.7.15"
+    "libsodium-wrappers": "^0.7.15",
+    "undici": "^7.10.0"
   }
 }

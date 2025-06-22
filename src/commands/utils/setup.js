@@ -38,6 +38,11 @@ module.exports = {
                                     new StringSelectMenuOptionBuilder()
                                         .setLabel("หน้าต่างการเปิดทิคเก็ตสนับสนุน")
                                         .setValue("setup_support_ticket"),
+                                )
+                                .addOptions(
+                                    new StringSelectMenuOptionBuilder()
+                                        .setLabel("หน้าต่างการยืนยันตัวตน")
+                                        .setValue("setup_verification"),
                                 ),
                         ),
                 )
@@ -63,6 +68,7 @@ module.exports = {
             const selectedValue = selection.values[0];
 
             switch (selectedValue) {
+                //  setup support ticket
                 case 'setup_support_ticket': {
                     const ticketComponent = [
                         new ContainerBuilder()
@@ -96,6 +102,43 @@ module.exports = {
                     });
                     break;
                 }
+
+                // setup verification
+                case 'setup_verification': {
+                    const verificationComponent = [
+                        new ContainerBuilder()
+                            .addMediaGalleryComponents(
+                                new MediaGalleryBuilder()
+                                    .addItems(
+                                        new MediaGalleryItemBuilder()
+                                            .setURL("https://media.discordapp.net/attachments/1385915359198183456/1386273719244030003/ece_component-cover-verify.png?ex=68591b82&is=6857ca02&hm=9c79c745cb849420dbae67e849dc8ce58825488f3adbfa930a2a05530325ddd0&=&format=webp&quality=lossless&width=1440&height=315"),
+                                    ),
+                            )
+                            .addTextDisplayComponents(
+                                new TextDisplayBuilder().setContent("# ✅ Verification — ยืนยันตัวตน\nยินดีต้อนรับคุณเข้าสู่เซิร์ฟเวอร์คอมมูนิตี้ของภาควิชา [วิศวกรรมไฟฟ้าและคอมพิวเตอร์](https://ece.eng.kmutnb.ac.th/en/) แห่ง[คณะวิศวกรรมศาสตร์](https://www.eng.kmutnb.ac.th/) จาก[มหาวิทยาลัยเทคโนโลยีพระจอมเกล้าพระนครเหนือ](https://www.kmutnb.ac.th/?lang=th)\n\nก่อนที่คุณจะสามารถเข้าถึงห้องต่างๆภายในเซิร์ฟเวอร์แห่งนี้ คุณจะต้องดำเนินการ \"ยืนยันตัวตน\" เสียก่อน เพื่อทำการรับบทบาทในเซิร์ฟเวอร์\nคุณสามารถทำการยืนยันตัวตนได้โดยการกดปุ่ม ``เริ่มยืนยันตัวตน`` ด้านล่าง\n\n-# คุณจะต้องยอมรับว่าข้อมูลที่ใส่มานั้นเป็นความจริง หากตรวจสอบแล้วพบว่ามีการลงทะเบียนด้วยข้อมูลที่ไม่จริง หรือมีเจตนาปั่นป่วน อาจมีการลงโทษในภายหลัง"),
+                            )
+                            .addSeparatorComponents(
+                                new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Large).setDivider(true),
+                            )
+                            .addActionRowComponents(
+                                new ActionRowBuilder()
+                                    .addComponents(
+                                        new ButtonBuilder()
+                                            .setStyle(ButtonStyle.Primary)
+                                            .setLabel("เริ่มยืนยันตัวตน")
+                                            .setCustomId("open_verification"),
+                                    ),
+                            ),
+                    ];
+
+                    await channel.send({
+                        components: verificationComponent,
+                        flags: MessageFlags.IsComponentsV2,
+                    });
+                    break;
+                }
+
+                // default
                 default: 
                     break;
             }

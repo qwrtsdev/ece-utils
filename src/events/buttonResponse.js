@@ -10,7 +10,10 @@ const {
     ButtonStyle, 
     ActionRowBuilder, 
     ContainerBuilder, 
-    EmbedBuilder
+    EmbedBuilder,
+    ModalBuilder,
+    TextInputBuilder,
+    TextInputStyle,
 } = require('discord.js');
 const { channels } = require('../utils/config.json')
 
@@ -41,7 +44,7 @@ module.exports = {
                 const ticketComponents = [
                     new ContainerBuilder()
                         .addTextDisplayComponents(
-                            new TextDisplayBuilder().setContent("- อธิบายปัญหาของคุณให้ชัดเจน ยิ่งละเอียดยิ่งดี!\n- กรุณาแนบรูปภาพ หรือวิดีโอประกอบเพื่อทำให้เข้าใจปัญหาได้ดียิ่งขึ้น\n- ทดลองค้นหาปัญหาใน Google หรือประวัติข้อความในเซิร์ฟเวอร์เพื่อไม่ให้ซ้ำคำถามเก่า\n- หากแก้ปัญหาได้แล้ว กรุณากดปุ่ม \"แก้ไขแล้ว\""),
+                            new TextDisplayBuilder().setContent(`<t:${unixTime}:f>\n\n- อธิบายปัญหาของคุณให้ชัดเจน ยิ่งละเอียดยิ่งดี!\n- กรุณาแนบรูปภาพ หรือวิดีโอประกอบเพื่อทำให้เข้าใจปัญหาได้ดียิ่งขึ้น\n- ทดลองค้นหาปัญหาใน Google หรือประวัติข้อความในเซิร์ฟเวอร์เพื่อไม่ให้ซ้ำคำถามเก่า\n- หากแก้ปัญหาได้แล้ว กรุณากดปุ่ม \"แก้ไขแล้ว\"`),
                         )
                         .addSeparatorComponents(
                             new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Large).setDivider(true),
@@ -99,6 +102,51 @@ module.exports = {
                 break;
             }
 
+            // handle verification
+            case 'open_verification': {
+                const modal = new ModalBuilder()
+                    .setCustomId('verification_modal')
+                    .setTitle('ยืนยันตัวตน')
+                    .addComponents(
+                        new ActionRowBuilder().addComponents(
+                            new TextInputBuilder()
+                                .setCustomId('userNickName')
+                                .setLabel("ชื่อเล่นของคุณ")
+                                .setStyle(TextInputStyle.Short)
+                                .setPlaceholder('เกม')
+                                .setRequired(true)
+                        ),
+                        new ActionRowBuilder().addComponents(
+                            new TextInputBuilder()
+                                .setCustomId('studentIdNumber')
+                                .setLabel("รหัสนักศึกษา 13 หลักของคุณ")
+                                .setStyle(TextInputStyle.Short)
+                                .setPlaceholder('680xxxxxxxxxx')
+                                .setMaxLength(13)
+                                .setMinLength(13)
+                                .setRequired(true)
+                        ),
+                        new ActionRowBuilder().addComponents(
+                            new TextInputBuilder()
+                                .setCustomId('departmentName')
+                                .setLabel("สาขาวิชาของคุณ")
+                                .setStyle(TextInputStyle.Short)
+                                .setPlaceholder('วิศวกรรมคอมพิวเตอร์')
+                                .setRequired(true)
+                        ),
+                        new ActionRowBuilder().addComponents(
+                            new TextInputBuilder()
+                                .setCustomId('instagramUsername')
+                                .setLabel("ชื่อผู้ใช้ Instagram ของคุณ")
+                                .setStyle(TextInputStyle.Short)
+                                .setPlaceholder('sillyqwrts')
+                        )
+                    );
+
+                await interaction.showModal(modal);
+                break;
+            }
+
             // handle threads
             case 'thread_problem_solved': {
                 const tagID = "1385693579845832824"
@@ -125,9 +173,9 @@ module.exports = {
 
                 break;
             }
-            default: {
-                return;
-            }
+
+            // default
+            default: return;
         }
     },
 };
