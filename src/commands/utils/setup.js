@@ -127,6 +127,10 @@ module.exports = {
                                             .setStyle(ButtonStyle.Primary)
                                             .setLabel("เริ่มยืนยันตัวตน")
                                             .setCustomId("open_verification"),
+                                        new ButtonBuilder()
+                                            .setStyle(ButtonStyle.Link)
+                                            .setLabel("มีปัญหาติดต่อที่นี่")
+                                            .setURL("https://discordapp.com/users/824442267318222879/"),
                                     ),
                             ),
                     ];
