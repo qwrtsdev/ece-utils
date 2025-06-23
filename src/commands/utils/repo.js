@@ -1,29 +1,62 @@
 const { 
     SlashCommandBuilder, 
-    MessageFlags 
+    MessageFlags,
+    TextDisplayBuilder, 
+    MediaGalleryBuilder, 
+    MediaGalleryItemBuilder, 
+    SeparatorBuilder, 
+    SeparatorSpacingSize, 
+    ButtonBuilder, 
+    ButtonStyle, 
+    ActionRowBuilder, 
+    ContainerBuilder,
 } = require('discord.js');
 const { request } = require('undici');
+const { repoURL } = require('../../utils/config.json');
 
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('repo')
-		.setDescription('ดู repository ของบอทผ่าน GitHub'),
+		.setDescription('ดู source code ของบอทผ่าน GitHub'),
 	async execute(interaction) {
 		await interaction.deferReply({
             flags: MessageFlags.Ephemeral
         });
 
         try {
-            const response = await request(`https://api.github.com/repos/qwrtsdev/ece-utils`, {
+            const response = await request(repoURL, {
                 headers: {
                     'User-Agent': 'node.js',
                     'Accept': 'application/vnd.github.v3+json'
                 }
             });
             const body = await response.body.json();
+            const unixTime = Math.floor(new Date(body.updated_at).getTime() / 1000);
 
             const component = [
-
+                new ContainerBuilder()
+                    .addTextDisplayComponents(
+                        new TextDisplayBuilder().setContent(`-# 📆 อัพเดตล่าสุด : <t:${unixTime}:f>\n# **${body.full_name}**\n\n${body.description}\n\n⭐ **${body.stargazers_count}**ᅠ⚠️ **${body.open_issues_count}**ᅠ🍴 **${body.forks_count}**`),
+                    )
+                    .addMediaGalleryComponents(
+                        new MediaGalleryBuilder()
+                            .addItems(
+                                new MediaGalleryItemBuilder()
+                                    .setURL(`https://opengraph.githubassets.com/random/${body.owner.login}/${body.name}`),
+                            ),
+                    )
+                    .addSeparatorComponents(
+                        new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Large).setDivider(true),
+                    )
+                    .addActionRowComponents(
+                        new ActionRowBuilder()
+                            .addComponents(
+                                new ButtonBuilder()
+                                    .setStyle(ButtonStyle.Link)
+                                    .setLabel("ไปที่หน้า Repository")
+                                    .setURL(`${body.html_url}`),
+                            ),
+                    ),
             ]
 
             await interaction.editReply({
@@ -31,6 +64,7 @@ module.exports = {
                 flags: MessageFlags.IsComponentsV2,
             })
         } catch (error) {
+            console.log('[repo] error :', error);
             await interaction.editReply({
                 content: '❌ เกิดข้อผิดพลาดในการดึงข้อมูล repository กรุณาลองใหม่อีกครั้งในภายหลัง',
                 flags: MessageFlags.Ephemeral

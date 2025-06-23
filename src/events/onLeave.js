@@ -21,7 +21,8 @@ module.exports = {
             const background = await Canvas.loadImage(bgBuffer);
             context.drawImage(background, 0, 0, canvas.width, canvas.height);
 
-            const avatarUrl = member.user.displayAvatarURL({ extension: 'jpg', size: 256 * 2 });
+            const imageSize = 400;
+            const avatarUrl = member.user.displayAvatarURL({ extension: 'jpg' });
             const { body } = await request(avatarUrl);
             const avatar = await Canvas.loadImage(await body.arrayBuffer());
 
@@ -30,7 +31,7 @@ module.exports = {
             context.arc(125, 125, 100, 0, Math.PI * 2, true);
             context.closePath();
             context.clip();
-            context.drawImage(avatar, 25, 25, 200, 200);
+            context.drawImage(avatar, 25, 25, imageSize, imageSize);
             context.restore();
 
             context.font = '60px sans-serif';
