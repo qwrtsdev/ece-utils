@@ -9,6 +9,7 @@
     "discord.js": "^14.19.3",
     "dotenv": "^16.5.0",
     "libsodium-wrappers": "^0.7.15",
+    "mongoose": "^8.16.0",
     "undici": "^7.10.0"
   }
 }

@@ -15,7 +15,7 @@ const {
     TextInputBuilder,
     TextInputStyle,
 } = require('discord.js');
-const { channels } = require('../utils/config.json')
+const { roles, channels } = require('../utils/config.json')
 
 module.exports = {
     name: Events.InteractionCreate,
@@ -23,6 +23,145 @@ module.exports = {
         const channel = interaction.channel;
         const user = interaction.user;
         const unixTime = Math.floor(Date.now() / 1000);
+
+        if (!interaction.isButton()) return;
+
+        if (interaction.customId.startsWith('VERIFY_USER-')) {
+            const userId = interaction.customId.split('-')[1];
+            const member = await interaction.guild.members.fetch(userId).catch(() => null);
+
+            if (!member) {
+                return interaction.reply({
+                    content: `❌ ไม่พบผู้ใช้ <@${userId}> ในเซิร์ฟเวอร์`,
+                    flags: MessageFlags.Ephemeral,
+                });
+            }
+
+            const editComponents = [
+                new ContainerBuilder()
+                    .addTextDisplayComponents(
+                        new TextDisplayBuilder().setContent(`✅ อนุมัติการเข้าร่วม <@${userId}> แล้ว`),
+                    ),
+            ]
+
+            await interaction.update({
+                components: editComponents,
+                flags: MessageFlags.IsComponentsV2,
+            })
+
+            const joinRole = interaction.guild.roles.cache.find(role => role.id === roles.unauthorized);
+            const verifyRole = interaction.guild.roles.cache.find(role => role.id === roles.member);
+            await member.roles.add(verifyRole)
+            await member.roles.remove(joinRole)
+
+            // const introductionChannel = interaction.client.channels.cache.get(channels.introduction);
+
+            // const introductionComponents = [
+            //     new ContainerBuilder()
+            //         .addSectionComponents(
+            //             new SectionBuilder()
+            //                 .setThumbnailAccessory(
+            //                     new ThumbnailBuilder()
+            //                         .setURL("")
+            //                 )
+            //                 .addTextDisplayComponents(
+            //                     new TextDisplayBuilder().setContent("# 📄 **${}**\n-# ${unixTime}\n\n1️⃣\n\\`\\`\\`${}\\`\\`\\`"),
+            //                 ),
+            //         )
+            //         .addSeparatorComponents(
+            //             new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Large).setDivider(true),
+            //         )
+            //         .addActionRowComponents(
+            //             new ActionRowBuilder()
+            //                 .addComponents(
+            //                     new ButtonBuilder()
+            //                         .setStyle(ButtonStyle.Link)
+            //                         .setLabel("Instagram")
+            //                         .setURL(`https://www.instagram.com/${}/`),
+            //                 ),
+            //         ),
+            // ]
+
+            // await introductionChannel.send({
+            //     components: introductionComponents,
+            //     flags: MessageFlags.IsComponentsV2,
+            // })
+
+            const dmComponents = [
+                new ContainerBuilder()
+                    .addTextDisplayComponents(
+                        new TextDisplayBuilder().setContent(`-# <t:${unixTime}:f>\n# ✅ **คุณผ่านการอนุมัติ !**\nยินดีด้วย คุณผ่านการคัดเลือกในการเข้าร่วมเซิร์ฟเวอร์เป็นที่เรียบร้อย\nขอต้อนรับเข้าสู่เซิร์ฟเวอร์ของภาควิชา Electrical and Computer Engineering!\n\nคุณสามารถเข้าไปพูดคุย / แชร์เนื้อหาเรียน / เล่นเกม และอื่นๆ ด้วยกันกับทุกคนในเซิร์ฟเวอร์ได้เลย\nแล้วอย่าลืมอ่านกฎของเซิร์ฟเวอร์ด้วยนะ ขอให้สนุก!`),
+                    )
+                    .addSeparatorComponents(
+                        new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small).setDivider(true),
+                    )
+                    .addActionRowComponents(
+                        new ActionRowBuilder()
+                            .addComponents(
+                                new ButtonBuilder()
+                                    .setStyle(ButtonStyle.Link)
+                                    .setLabel("ไปที่แชทหลัก")
+                                    .setURL("https://discord.com/channels/1385682544623616211/1385682545210949840"),
+                            ),
+                    ),
+            ]
+
+            return member.send({
+                components: dmComponents,
+                flags: MessageFlags.IsComponentsV2,
+            })
+        } else if (interaction.customId.startsWith('DENY_USER-')) {
+            const userId = interaction.customId.split('-')[1];
+            const member = await interaction.guild.members.fetch(userId).catch(() => null);
+
+            if (!member) {
+                return interaction.reply({
+                    content: `❌ ไม่พบผู้ใช้ <@${userId}> ในเซิร์ฟเวอร์`,
+                    flags: MessageFlags.Ephemeral,
+                });
+            }
+
+            const editComponents = [
+                new ContainerBuilder()
+                    .addTextDisplayComponents(
+                        new TextDisplayBuilder().setContent(`❌ ปฎิเสธการเข้าร่วม <@${userId}> แล้ว`),
+                    ),
+            ]
+
+            await interaction.update({
+                components: editComponents,
+                flags: MessageFlags.IsComponentsV2,
+            })
+
+            const dmComponents = [
+                new ContainerBuilder()
+                    .addTextDisplayComponents(
+                        new TextDisplayBuilder().setContent(`-# <t:${unixTime}:f>\n# ⚠️ **คุณไม่ผ่านการอนุมัติ !**\nขออภัย ขณะนี้คุณไม่ผ่านการอนุมัติดการเข้าร่วมเซิร์ฟเวอร์ของเรา เนื่องจากอาจมีคุณสมบัติที่ไม่ตรงกับวัตถุประสงค์นัก\n\nหากคิดว่านี่อาจเป็นความผิดพลาด สามารถส่งคำขอผ่านการยืนยันตัวตนเข้ามาใหม่ \nหรือ กรุณาติดต่อทีมงานโดยทันที`),
+                    )
+                    .addSeparatorComponents(
+                        new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Small).setDivider(true),
+                    )
+                    .addActionRowComponents(
+                        new ActionRowBuilder()
+                            .addComponents(
+                                new ButtonBuilder()
+                                    .setStyle(ButtonStyle.Link)
+                                    .setLabel("ไปลงทะเบียนใหม่")
+                                    .setURL("https://discord.com/channels/1385682544623616211/1385686306033762496"),
+                                new ButtonBuilder()
+                                    .setStyle(ButtonStyle.Link)
+                                    .setLabel("ติดต่อแอดมิน")
+                                    .setURL("https://discordapp.com/users/824442267318222879/"),
+                            ),
+                    ),
+
+            ]
+
+            return member.send({
+                components: dmComponents,
+                flags: MessageFlags.IsComponentsV2,
+            })
+        }
 
         switch (interaction.customId) {
             // handle support ticket

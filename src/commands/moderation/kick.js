@@ -61,10 +61,7 @@ module.exports = {
             const promptComponents = [
                 new ContainerBuilder()
                     .addTextDisplayComponents(
-                        new TextDisplayBuilder().setContent("# ❓ **คุณมั่นใจหรือไม่**"),
-                    )
-                    .addTextDisplayComponents(
-                        new TextDisplayBuilder().setContent(`หากดำเนินการแล้ว จะไม่สามารถดำเนินการได้อีก\n\n👤 ชื่อผู้ใช้งาน : <@${target.user.id}> (${target.user.id})\n🔨 ผู้ดำเนินการ :  <@${interaction.user.id}> (${interaction.user.id})\n🕑 เวลา :  <t:${unixTime}:f>\n📄 เหตุผล :  ${reason}\n\n-# โปรดดำเนินการภายใน 10 วินาทีก่อนหมดอายุ`),
+                        new TextDisplayBuilder().setContent(`# ❓ **คุณมั่นใจหรือไม่**\nหากดำเนินการแล้ว จะไม่สามารถดำเนินการได้อีก\n\n👤 ชื่อผู้ใช้งาน : <@${target.user.id}> (${target.user.id})\n🔨 ผู้ดำเนินการ :  <@${interaction.user.id}> (${interaction.user.id})\n🕑 เวลา :  <t:${unixTime}:f>\n📄 เหตุผล :  ${reason}\n\n-# โปรดดำเนินการภายใน 10 วินาทีก่อนหมดอายุ`),
                     )
                     .addSeparatorComponents(
                         new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Large).setDivider(true),

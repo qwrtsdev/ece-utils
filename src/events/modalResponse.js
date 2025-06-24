@@ -5,19 +5,64 @@ const {
     ButtonBuilder,
     ButtonStyle,
     ActionRowBuilder,
+    ContainerBuilder,
+    TextDisplayBuilder,
+    SectionBuilder,
+    ThumbnailBuilder,
+    SeparatorBuilder,
+    SeparatorSpacingSize,
+    ModalSubmitInteraction,
 } = require('discord.js')
-const { roles, channels } = require('../utils/config.json');
+const { channels } = require('../utils/config.json');
 
 module.exports = {
     name: Events.InteractionCreate,
     once: false,
 
     async execute(interaction) {  
+        const unixTime = Math.floor(Date.now() / 1000);
+
         if (!interaction.isModalSubmit()) return;
 
         switch (interaction.customId) {
             case 'verification_modal': {
                 try {
+                    const requestChannel = interaction.client.channels.cache.get(channels.request);
+                    const userNickName = interaction.fields.getTextInputValue('userNickName');
+                    const studentIdNumber = interaction.fields.getTextInputValue('studentIdNumber');
+                    const departmentName = interaction.fields.getTextInputValue('departmentName');
+                    const instagramUsername = interaction.fields.getTextInputValue('instagramUsername');
+
+                    const requestComponents = [
+                        new ContainerBuilder()
+                            .addSectionComponents(
+                                new SectionBuilder()
+                                    .setThumbnailAccessory(
+                                        new ThumbnailBuilder()
+                                            .setURL(interaction.user.displayAvatarURL({ extension: 'png' }))
+                                    )
+                                    .addTextDisplayComponents(
+                                        new TextDisplayBuilder().setContent(`-# 📄 **คำขอเข้าร่วมใหม่**\n# **<@${interaction.user.id}>**\n<t:${unixTime}:f>\n\n1️⃣ ชื่อเล่นของคุณ\n\`\`\`${userNickName}\`\`\`\n2️⃣ รหัสนักศึกษา 13 หลักของคุณ\n\`\`\`${studentIdNumber}\`\`\`\n3️⃣ สาขาวิชาของคุณ\n\`\`\`${departmentName}\`\`\`\n4️⃣ ชื่อผู้ใช้ Instagram ของคุณ\n\`\`\`${instagramUsername}\`\`\``),
+                                    ),
+                            )
+                            .addSeparatorComponents(
+                                new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Large).setDivider(true),
+                            )
+                            .addActionRowComponents(
+                                new ActionRowBuilder()
+                                    .addComponents(
+                                        new ButtonBuilder()
+                                            .setStyle(ButtonStyle.Success)
+                                            .setLabel("อนุมัติสมาชิก")
+                                            .setCustomId(`VERIFY_USER-${interaction.user.id}`),
+                                        new ButtonBuilder()
+                                            .setStyle(ButtonStyle.Danger)
+                                            .setLabel("ปฎิเสธการเข้าร่วม")
+                                            .setCustomId(`DENY_USER-${interaction.user.id}`),
+                                    ),
+                            ),
+                    ];
+
                     const replyEmbed = new EmbedBuilder()
                         .setDescription(`✅ <@${interaction.user.id}> ยืนยันตัวตนเสร็จแล้ว!`)
                         .setColor("#33ff70");
@@ -26,26 +71,22 @@ module.exports = {
                         embeds: [replyEmbed],
                     });
 
-                    const joinRole = interaction.guild.roles.cache.find(role => role.id === roles.unauthorized);
-                    const verifyRole = interaction.guild.roles.cache.find(role => role.id === roles.member);
-                    await interaction.member.roles.remove(joinRole);
-                    await interaction.member.roles.add(verifyRole);
+                    await requestChannel.send({
+                        components: requestComponents,
+                        flags: MessageFlags.IsComponentsV2,
+                    });
 
-                    const dmEmbed = new EmbedBuilder()
-                        .setDescription(`# ✅ **ยืนยันตัวตนสำเร็จ**\nยินดีต้อนรับ <@${interaction.user.id}> คุณได้รับการอนุมัติเข้าสู่เซิร์ฟเวอร์คอมมูนิตี้ Electrical Engineering and Computer แล้ว!\n\nคุณสามารถเข้าไปพูดคุย / แชร์เนื้อหาเรียน / เล่นเกม และอื่นๆ ด้วยกันกับทุกคนในเซิร์ฟเวอร์ได้เลย\n\n**แล้วอย่าลืมอ่านกฎของเซิร์ฟเวอร์ด้วยนะ ขอให้สนุก!**`)
-                        .setImage("https://i.imgflip.com/1xilhy.jpg")
-                        .setColor("#33ff70")
-                    const goToChat = new ButtonBuilder()
-                        .setLabel('ไปที่ห้องแชท')
-                        .setStyle(ButtonStyle.Link)
-                        .setURL('https://discord.com/channels/1385682544623616211/1385682545210949840');
-                    const dmRow = new ActionRowBuilder()
-			            .addComponents(goToChat);
+                    const dmComponents = [
+                        new ContainerBuilder()
+                            .addTextDisplayComponents(
+                                new TextDisplayBuilder().setContent(`-# <t:${unixTime}:f>\n# 🕑 **ส่งคำขอเข้าร่วมสำเร็จแล้ว !**\nคุณทำการส่งคำขอเข้าร่วมเซิร์ฟเวอร์ผ่านการยืนยันตัวตนสำเร็จแล้ว\n\nกรุณารอการอนุมัติจากทีมงาน อาจใช้เวลาในการดำเนินการสักพัก...\nหากคุณได้รับอนุญาติให้เข้าร่วมแล้ว จะได้รับการแจ้งเตือนทันที`),
+                            ),
+                    ];
 
                     await interaction.user.send({
-                        embeds: [dmEmbed],
-                        components: [dmRow],
-                    })
+                        components: dmComponents,
+                        flags: MessageFlags.IsComponentsV2,
+                    });
 
                     setTimeout(async () => { await response.delete(); }, 3000);
                 } catch (error) {

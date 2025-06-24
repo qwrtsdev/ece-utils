@@ -36,7 +36,7 @@ module.exports = {
             const component = [
                 new ContainerBuilder()
                     .addTextDisplayComponents(
-                        new TextDisplayBuilder().setContent(`-# 📆 อัพเดตล่าสุด : <t:${unixTime}:f>\n# **${body.full_name}**\n\n${body.description}\n\n⭐ **${body.stargazers_count}**ᅠ⚠️ **${body.open_issues_count}**ᅠ🍴 **${body.forks_count}**`),
+                        new TextDisplayBuilder().setContent(`-# 📆 <t:${unixTime}:f>\n# **${body.full_name}**\n\n${body.description}\n\n⭐ **${body.stargazers_count}**ᅠ⚠️ **${body.open_issues_count}**ᅠ🍴 **${body.forks_count}**`),
                     )
                     .addMediaGalleryComponents(
                         new MediaGalleryBuilder()
@@ -66,7 +66,7 @@ module.exports = {
         } catch (error) {
             console.log('[repo] error :', error);
             await interaction.editReply({
-                content: '❌ เกิดข้อผิดพลาดในการดึงข้อมูล repository กรุณาลองใหม่อีกครั้งในภายหลัง',
+                content: '❌ เกิดข้อผิดพลาดในการดึงข้อมูล repository กรุณาลองใหม่อีกครั้งในภายหลังn\n||GitHub อนุญาตให้ fetch api แบบ un-authenticate ได้วันละไม่เกิน 60 รอบ เพราะงั้นพรุ่งนี้ค่อยลองใหม่ละกันนะ||',
                 flags: MessageFlags.Ephemeral
             });
         }
