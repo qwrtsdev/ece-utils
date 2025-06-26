@@ -14,6 +14,7 @@ const {
     ModalSubmitInteraction,
 } = require('discord.js')
 const { channels } = require('../utils/config.json');
+const eceMembers = require('../models/user.js');
 
 module.exports = {
     name: Events.InteractionCreate,
@@ -70,6 +71,13 @@ module.exports = {
                     const response = await interaction.reply({
                         embeds: [replyEmbed],
                     });
+
+                    await eceMembers.create({
+                        userID: interaction.user.id,
+                        nickname: userNickName,
+                        department: departmentName,
+                        instagram: instagramUsername,
+                    })
 
                     await requestChannel.send({
                         components: requestComponents,

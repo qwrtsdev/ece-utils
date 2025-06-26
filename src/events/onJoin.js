@@ -4,6 +4,7 @@ const { roles, channels } = require('../utils/config.json');
 const fs = require('fs');
 const path = require('path');
 const { request } = require('undici');
+const eceMembers = require('../models/user.js');
 
 module.exports = {
     name: Events.GuildMemberAdd,
@@ -13,9 +14,18 @@ module.exports = {
         try {
             const unixTime = Math.floor(Date.now() / 1000);
 
+            const userData = await eceMembers.findOne({
+                userID: member.id
+            })
+
             // join roles
-            const joinRole = member.guild.roles.cache.get(roles.unauthorized);
-            await member.roles.add(joinRole);
+            if (userData.matchedCount && userData.isVerified) {
+                const newMemberRole = member.guild.roles.cache.get(roles.unauthorized);
+                await member.roles.add(newMemberRole);
+            } else {
+                const verifiedRole = member.guild.roles.cache.get(roles.member);
+                await member.roles.add(verifiedRole);
+            }
 
             // canvas
             const canvas = Canvas.createCanvas(1400, 500);

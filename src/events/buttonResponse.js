@@ -15,7 +15,8 @@ const {
     TextInputBuilder,
     TextInputStyle,
 } = require('discord.js');
-const { roles, channels } = require('../utils/config.json')
+const { roles, channels } = require('../utils/config.json');
+const eceMembers = require('../models/user.js');
 
 module.exports = {
     name: Events.InteractionCreate,
@@ -26,6 +27,7 @@ module.exports = {
 
         if (!interaction.isButton()) return;
 
+        // verification buttons
         if (interaction.customId.startsWith('VERIFY_USER-')) {
             const userId = interaction.customId.split('-')[1];
             const member = await interaction.guild.members.fetch(userId).catch(() => null);
@@ -54,38 +56,8 @@ module.exports = {
             await member.roles.add(verifyRole)
             await member.roles.remove(joinRole)
 
-            // const introductionChannel = interaction.client.channels.cache.get(channels.introduction);
-
-            // const introductionComponents = [
-            //     new ContainerBuilder()
-            //         .addSectionComponents(
-            //             new SectionBuilder()
-            //                 .setThumbnailAccessory(
-            //                     new ThumbnailBuilder()
-            //                         .setURL("")
-            //                 )
-            //                 .addTextDisplayComponents(
-            //                     new TextDisplayBuilder().setContent("# 📄 **${}**\n-# ${unixTime}\n\n1️⃣\n\\`\\`\\`${}\\`\\`\\`"),
-            //                 ),
-            //         )
-            //         .addSeparatorComponents(
-            //             new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Large).setDivider(true),
-            //         )
-            //         .addActionRowComponents(
-            //             new ActionRowBuilder()
-            //                 .addComponents(
-            //                     new ButtonBuilder()
-            //                         .setStyle(ButtonStyle.Link)
-            //                         .setLabel("Instagram")
-            //                         .setURL(`https://www.instagram.com/${}/`),
-            //                 ),
-            //         ),
-            // ]
-
-            // await introductionChannel.send({
-            //     components: introductionComponents,
-            //     flags: MessageFlags.IsComponentsV2,
-            // })
+            const updateDB = await eceMembers.updateOne({ userID: userId }, { isVerified: true });
+            console.log('Updated DB :', updateDB);
 
             const dmComponents = [
                 new ContainerBuilder()
