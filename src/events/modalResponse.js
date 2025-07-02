@@ -11,10 +11,9 @@ const {
     ThumbnailBuilder,
     SeparatorBuilder,
     SeparatorSpacingSize,
-    ModalSubmitInteraction,
 } = require('discord.js')
 const { channels } = require('../utils/config.json');
-const eceMembers = require('../models/user.js');
+const eceMembers = require('../models/users.js');
 
 module.exports = {
     name: Events.InteractionCreate,
@@ -26,6 +25,7 @@ module.exports = {
         if (!interaction.isModalSubmit()) return;
 
         switch (interaction.customId) {
+            // after verification modal
             case 'verification_modal': {
                 try {
                     const requestChannel = interaction.client.channels.cache.get(channels.request);
@@ -114,31 +114,144 @@ module.exports = {
                 break;
             }
 
+            // after anonymous 
             case 'anonymous': {
-                const channel = interaction.client.channels.cache.get(channels.anonymous);
-                const logChannel = interaction.client.channels.cache.get(channels.modlogs);
-                const anonymousMessage = interaction.fields.getTextInputValue('anonymousMessage');
+                try {
+                    const channel = interaction.client.channels.cache.get(channels.anonymous);
+                    const logChannel = interaction.client.channels.cache.get(channels.modlogs);
+                    const anonymousMessage = interaction.fields.getTextInputValue('anonymousMessage');
 
-                const replyEmbed = new EmbedBuilder()
-                    .setDescription(`✅ <@${interaction.user.id}> ส่งข้อความสำเร็จแล้ว!`)
-                    .setColor("#33ff70");
+                    const replyEmbed = new EmbedBuilder()
+                        .setDescription(`✅ <@${interaction.user.id}> ส่งข้อความสำเร็จแล้ว!`)
+                        .setColor("#33ff70");
 
-                const response = await interaction.reply({
-                    embeds: [replyEmbed],
-                });
-                setTimeout(async () => { await response.delete(); }, 10);
+                    const response = await interaction.reply({
+                        embeds: [replyEmbed],
+                    });
+                    setTimeout(async () => { await response.delete(); }, 10);
 
-                const message = await channel.send({
-                    content: `\`\`💬 ใครบางคน :\`\`\n${anonymousMessage}`
-                })
+                    const message = await channel.send({
+                        content: `\`\`💬 ใครบางคน :\`\`\n${anonymousMessage}`
+                    })
 
-                const logEmbed = new EmbedBuilder()
-                    .setDescription(`💬 <@${interaction.user.id}> ส่งข้อความลับ ${message.url}`)
-                    .setColor("#fafafa");
-                await logChannel.send({
-                    embeds: [logEmbed],
-                })
+                    const logEmbed = new EmbedBuilder()
+                        .setDescription(`💬 <@${interaction.user.id}> ส่งข้อความลับ ${message.url}`)
+                        .setColor("#fafafa");
+                        
+                    await logChannel.send({
+                        embeds: [logEmbed],
+                    })
+                } catch (error) {
+                    console.error('[anonymous] error :', error);
+                }
 
+                break;
+            }
+
+            // after profile modals
+            case 'profile_setup_modal': {
+                await interaction.deferReply();
+
+                try {
+                    const nickname = interaction.fields.getTextInputValue('setupNickname');
+                    const department = interaction.fields.getTextInputValue('setupDepartment');
+                    let instagram = interaction.fields.getTextInputValue('setupInstagram') || null;
+
+                    await eceMembers.create({
+                        userID: interaction.user.id,
+                        nickname: nickname,
+                        department: department,
+                        instagram: instagram,
+                        isVerified: true,
+                    })
+
+                    const setupProfileSuccessComponents = [
+                        new ContainerBuilder()
+                            .addSectionComponents(
+                                new SectionBuilder()
+                                    .setThumbnailAccessory(
+                                        new ThumbnailBuilder()
+                                            .setURL(interaction.user.displayAvatarURL({ extension: 'png' }))
+                                    )
+                                    .addTextDisplayComponents(
+                                        new TextDisplayBuilder().setContent([
+                                            `-# ✅ ตั้งค่าโปรไฟล์สำเร็จ`,
+                                            `# <@${interaction.user.id}>`,
+                                            `ᅠ`,
+                                            `👤 ชื่อเล่น : \`\`${nickname || '-'}\`\``,
+                                            `🌿 สาขาวิชา : \`\`${department || '-'}\`\``,
+                                            `📱 ไอจี : \`\`${instagram || '-'}\`\``,
+                                        ].join('\n')),
+                                    ),
+                            )
+                    ]
+
+                    const response = await interaction.editReply({
+                        components: setupProfileSuccessComponents,
+                        flags: MessageFlags.IsComponentsV2,
+                    })
+
+                    setTimeout(async () => { await response.delete(); }, 3000);
+                } catch (error) {
+                    console.error('[setup profile] error:', error);
+                }
+                
+                break;
+            }
+            case 'profile_edit_modal': {
+                await interaction.deferReply();
+
+                try {
+                    const userData = await eceMembers.findOne({ userID: interaction.user.id });
+
+                    const nickname = interaction.fields.getTextInputValue('profileNickname') || userData.nickname;
+                    const department = interaction.fields.getTextInputValue('profileDepartment') || userData.department;
+                    let instagram = interaction.fields.getTextInputValue('profileInstagram') || userData.instagram;
+
+                    if (instagram === '!del' || instagram === '!Del') { instagram = null; }
+
+                    await eceMembers.updateOne(
+                        { userID: interaction.user.id },
+                        {
+                            $set: {
+                                nickname: nickname,
+                                department: department,
+                                instagram: instagram,
+                            }
+                        }
+                    );
+
+                    const editProfileSuccessComponents = [
+                        new ContainerBuilder()
+                            .addSectionComponents(
+                                new SectionBuilder()
+                                    .setThumbnailAccessory(
+                                        new ThumbnailBuilder()
+                                            .setURL(interaction.user.displayAvatarURL({ extension: 'png' }))
+                                    )
+                                    .addTextDisplayComponents(
+                                        new TextDisplayBuilder().setContent([
+                                            `-# ✅ แก้ไขโปรไฟล์สำเร็จ`,
+                                            `# <@${interaction.user.id}>`,
+                                            `ᅠ`,
+                                            `👤 ชื่อเล่น : \`\`${nickname || '-'}\`\``,
+                                            `🌿 สาขาวิชา : \`\`${department || '-'}\`\``,
+                                            `📱 ไอจี : \`\`${instagram || '-'}\`\``,
+                                        ].join('\n')),
+                                    ),
+                            )
+                    ]
+
+                    const response = await interaction.editReply({
+                        components: editProfileSuccessComponents,
+                        flags: MessageFlags.IsComponentsV2,
+                    })
+
+                    setTimeout(async () => { await response.delete(); }, 3000);
+                } catch (error) {
+                    console.error('[edit profile] error:', error);
+                }
+                
                 break;
             }
 

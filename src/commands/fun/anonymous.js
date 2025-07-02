@@ -1,7 +1,5 @@
 const {
     SlashCommandBuilder,
-    InteractionContextType,
-    MessageFlags,
     ModalBuilder,
     ActionRowBuilder,
     TextInputBuilder,

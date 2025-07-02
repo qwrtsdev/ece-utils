@@ -35,22 +35,19 @@ const rest = new REST().setToken(process.env.BOT_TOKEN);
 // and deploy your commands!
 (async () => {
     try {
-        console.log(
-            `Started refreshing ${commands.length} application (/) commands.`
-        );
-
-        // The put method is used to fully refresh all commands in the guild with the current set
-        const data = await rest.put(
+        rest.put(
             Routes.applicationGuildCommands(
                 process.env.APP_ID,
                 process.env.GUILD_ID
             ),
-            { body: commands }
-        );
-
-        console.log(
-            `Successfully reloaded ${data.length} application (/) commands.`
-        );
+            {
+                // body: [], FOR ALL COMMANDS (RE-SETUP)
+                // 'commandID', FOR SPECIFIC COMMANDS (NO RE-SETUP)
+                body: [],
+            }
+        )
+            .then(() => console.log("Successfully deleted all guild commands."))
+            .catch(console.error);
     } catch (error) {
         // And of course, make sure you catch and log any errors!
         console.error(error);
