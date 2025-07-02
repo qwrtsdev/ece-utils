@@ -1,4 +1,4 @@
-const { Events } = require('discord.js');
+const { Events } = require("discord.js");
 
 module.exports = {
     name: Events.VoiceStateUpdate,
@@ -6,5 +6,5 @@ module.exports = {
 
     async execute(oldState, newState) {
         console.log(`joined channel 1385935896980754442`);
-    }
-}
+    },
+};

@@ -1,14 +1,14 @@
-const { 
-    ContextMenuCommandBuilder, 
+const {
+    ContextMenuCommandBuilder,
     ApplicationCommandType,
-} = require('discord.js');
+} = require("discord.js");
 
 module.exports = {
     data: new ContextMenuCommandBuilder()
-        .setName('Info')
+        .setName("Info")
         .setType(ApplicationCommandType.User),
 
     async execute(interaction) {
         // ..
-    }
-}
+    },
+};
